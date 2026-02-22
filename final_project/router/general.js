@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
@@ -28,15 +29,28 @@ public_users.post("/register", (req, res) => {
  //   res.send(JSON.stringify(books, null, 4));
  // });
 // Task 10
-public_users.get('/', function (req, res) {
-    const getBooks = new Promise((resolve, reject) => {
-        resolve(books);
-    });
+const axios = require('axios');
 
-    getBooks.then((bookList) => {
-        res.status(200).send(JSON.stringify(bookList, null, 4));
-    }).catch((error) => {
-        res.status(500).json({ message: "Error retrieving books" });
+// Task 10: Get the book list available in the shop using Async-Await with Axios
+public_users.get('/', async function (req, res) {
+  try {
+    // In a real scenario, this would be an external API URL
+    const response = await axios.get("http://localhost:5000/internal/books"); 
+    res.status(200).send(JSON.stringify(response.data, null, 4));
+  } catch (error) {
+    res.status(500).json({message: "Error retrieving books"});
+  }
+});
+
+// Task 11: Get book details based on ISBN using Promises
+public_users.get('/isbn/:isbn', function (req, res) {
+  const isbn = req.params.isbn;
+  axios.get(`http://localhost:5000/internal/books/${isbn}`)
+    .then(response => {
+      res.status(200).send(JSON.stringify(response.data, null, 4));
+    })
+    .catch(err => {
+      res.status(404).json({message: "Book not found"});
     });
 });
 // Get book details based on ISBN
